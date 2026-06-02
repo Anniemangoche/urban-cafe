@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Urban Cafe — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Josefin+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0E0906;--sidebar:#160D0A;--card:#1E120E;--card2:#261816;
+  --gold:#D4A15A;--gold2:#B8863A;--cream:#F5F1EB;--sage:#7A9E7E;
+  --red:#C0392B;--green:#27AE60;--muted:rgba(245,241,235,.45);
+  --border:rgba(212,161,90,.15);--border2:rgba(212,161,90,.28);
+}
+body{background:var(--bg);color:var(--cream);font-family:'Josefin Sans',sans-serif;min-height:100vh;display:flex}
+
+/* ── LOGIN SCREEN ── */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+}
+.login-box{
+  width:380px;padding:3rem 2.5rem;
+  border:1px solid var(--border2);background:var(--card);
+}
+.login-logo{
+  font-family:'Playfair Display',serif;font-size:1.8rem;
+  color:var(--gold);letter-spacing:.2em;text-transform:uppercase;
+  text-align:center;margin-bottom:.3rem;
+}
+.login-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:2.5rem}
+.login-label{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.5rem}
+.login-input{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  color:var(--cream);padding:.75rem 1rem;font-family:'Josefin Sans',sans-serif;
+  font-size:.8rem;margin-bottom:1.2rem;outline:none;
+  transition:border-color .3s;
+}
+.login-input:focus{border-color:var(--gold)}
+.login-btn{
+  width:100%;background:var(--gold);color:var(--bg);border:none;
+  padding:.85rem;font-family:'Josefin Sans',sans-serif;
+  font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;
+  cursor:pointer;transition:background .3s;
+}
+.login-btn:hover{background:#E8B86A}
+.login-err{font-size:.65rem;color:#E74C3C;text-align:center;margin-top:.8rem;min-height:1rem}
+
+/* ── SIDEBAR ── */
+#app{display:none;width:100%;min-height:100vh;flex-direction:row}
+.sidebar{
+  width:230px;min-height:100vh;background:var(--sidebar);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  flex-shrink:0;
+}
+.sb-logo{padding:1.8rem 1.5rem 1.2rem;border-bottom:1px solid var(--border)}
+.sb-logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
+.sb-logo-sub{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+.sb-section{font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);padding:.9rem 1.5rem .4rem}
+.sb-link{
+  display:flex;align-items:center;gap:.75rem;padding:.7rem 1.5rem;
+  font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  cursor:pointer;transition:all .25s;border-left:2px solid transparent;
+}
+.sb-link:hover{color:var(--cream);background:rgba(212,161,90,.06)}
+.sb-link.active{color:var(--gold);border-left-color:var(--gold);background:rgba(212,161,90,.08)}
+.sb-icon{font-size:1rem;width:16px;text-align:center}
+.sb-bottom{margin-top:auto;padding:1.2rem 1.5rem;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:.7rem}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--bg)}
+.sb-username{font-size:.65rem;color:var(--cream)}
+.sb-role{font-size:.52rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.sb-logout{font-size:.58rem;color:var(--muted);cursor:pointer;margin-top:.3rem;transition:color .2s;text-decoration:underline;letter-spacing:.1em}
+.sb-logout:hover{color:var(--gold)}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;overflow-y:auto;padding:2rem 2.2rem}
+.page{display:none}
+.page.active{display:block}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.page-title{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--cream)}
+.page-sub{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card);border:1px solid var(--border);padding:1.3rem}
+.stat-label{font-size:.55rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold)}
+.stat-sub{font-size:.58rem;color:var(--sage);margin-top:.3rem}
+
+/* ── BUTTONS ── */
+.btn{
+  font-family:'Josefin Sans',sans-serif;font-size:.62rem;letter-spacing:.18em;
+  text-transform:uppercase;padding:.55rem 1.3rem;cursor:pointer;transition:all .25s;border:none;
+}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:#E8B86A}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--gold)}
+.btn-outline:hover{background:var(--gold);color:var(--bg)}
+.btn-danger{background:transparent;border:1px solid rgba(192,57,43,.4);color:#E74C3C}
+.btn-danger:hover{background:#C0392B;color:#fff;border-color:#C0392B}
+.btn-sm{padding:.38rem .9rem;font-size:.58rem}
+.btn-icon{background:transparent;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;font-size:.85rem}
+.btn-icon:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--card);border:1px solid var(--border);overflow:hidden}
+.table-toolbar{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.3rem;border-bottom:1px solid var(--border)}
+.table-title{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--cream)}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{font-size:.55rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border);background:var(--card2)}
+td{font-size:.72rem;padding:.75rem 1rem;border-bottom:1px solid rgba(212,161,90,.07);vertical-align:middle;color:var(--cream)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(212,161,90,.04)}
+
+/* ── BADGES ── */
+.badge{display:inline-block;font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;padding:.22rem .65rem;border-radius:2px}
+.badge-live{background:rgba(39,174,96,.15);color:#2ECC71;border:1px solid rgba(39,174,96,.3)}
+.badge-sold{background:rgba(192,57,43,.15);color:#E74C3C;border:1px solid rgba(192,57,43,.3)}
+.badge-new{background:rgba(212,161,90,.15);color:var(--gold);border:1px solid rgba(212,161,90,.3)}
+.badge-veg{background:rgba(122,158,126,.15);color:var(--sage);border:1px solid rgba(122,158,126,.3)}
+
+/* ── TOGGLE ── */
+.toggle{position:relative;width:38px;height:20px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(245,241,235,.15);transition:.3s;border-radius:20px}
+.toggle-slider::before{content:'';position:absolute;height:14px;width:14px;left:3px;top:3px;background:var(--muted);transition:.3s;border-radius:50%}
+.toggle input:checked+.toggle-slider{background:rgba(39,174,96,.4)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);background:#2ECC71}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(14,9,6,.85);
+  z-index:500;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);width:520px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.4rem 1.6rem;border-bottom:1px solid var(--border)}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--cream)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:.3rem;transition:color .2s}
+.modal-close:hover{color:var(--gold)}
+.modal-body{padding:1.6rem}
+.modal-footer{padding:1rem 1.6rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.8rem}
+
+/* ── FORM ── */
+.form-group{margin-bottom:1.2rem}
+.form-label{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.45rem}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  color:var(--cream);padding:.7rem .9rem;
+  font-family:'Josefin Sans',sans-serif;font-size:.78rem;outline:none;transition:border-color .3s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-select option{background:var(--card)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-hint{font-size:.58rem;color:var(--muted);margin-top:.3rem}
+
+/* ── ACTIVITY FEED ── */
+.activity-list{background:var(--card);border:1px solid var(--border)}
+.activity-item{display:flex;gap:1rem;padding:.9rem 1.2rem;border-bottom:1px solid rgba(212,161,90,.07);align-items:flex-start}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.activity-text{font-size:.7rem;color:var(--cream);line-height:1.5}
+.activity-time{font-size:.58rem;color:var(--muted);margin-top:.15rem}
+
+/* ── QUICK ACTIONS ── */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.quick-card{background:var(--card);border:1px solid var(--border);padding:1.2rem;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;gap:.5rem}
+.quick-card:hover{border-color:var(--gold);background:var(--card2)}
+.quick-icon{font-size:1.3rem}
+.quick-label{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--cream)}
+.quick-desc{font-size:.6rem;color:var(--muted)}
+
+/* ── SECTION DIVIDER ── */
+.sec-div{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin:1.8rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:2000;
+  background:var(--card2);border:1px solid var(--border2);
+  padding:.8rem 1.4rem;font-size:.68rem;color:var(--cream);
+  letter-spacing:.1em;opacity:0;transform:translateY(10px);
+  transition:all .3s;pointer-events:none;
+}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar{width:52px}
+  .sb-link span,.sb-logo-text,.sb-logo-sub,.sb-section,.sb-username,.sb-role,.sb-logout{display:none}
+  .sb-link{justify-content:center;padding:.7rem}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .quick-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     LOGIN SCREEN
+════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Urban Cafe</div>
+    <div class="login-sub">Admin Dashboard · Secure Login</div>
+    <label class="login-label">Username</label>
+    <input class="login-input" type="text" id="l-user" placeholder="admin" autocomplete="off">
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="l-pass" placeholder="••••••••">
+    <button class="login-btn" onclick="doLogin()">Sign In to Dashboard</button>
+    <div class="login-err" id="l-err"></div>
+    <div style="text-align:center;margin-top:1.5rem;font-size:.58rem;color:var(--muted)">
+      Demo: username <span style="color:var(--gold)">admin</span> · password <span style="color:var(--gold)">cafe2024</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     APP SHELL
+════════════════════════════════════ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-text">Urban Cafe</div>
+      <div class="sb-logo-sub">Admin Panel</div>
+    </div>
+
+    <div class="sb-section">Main</div>
+    <div class="sb-link active" onclick="showPage('dashboard',this)"><span class="sb-icon">⊞</span><span>Dashboard</span></div>
+    <div class="sb-link" onclick="showPage('specials',this)"><span class="sb-icon">🍽</span><span>Today's Specials</span></div>
+    <div class="sb-link" onclick="showPage('legends',this)"><span class="sb-icon">⭐</span><span>Urban Legends</span></div>
+    <div class="sb-link" onclick="showPage('coffee',this)"><span class="sb-icon">☕</span><span>Coffee Bar</span></div>
+    <div class="sb-link" onclick="showPage('drinks',this)"><span class="sb-icon">🥤</span><span>Drinks Menu</span></div>
+    <div class="sb-link" onclick="showPage('desserts',this)"><span class="sb-icon">🍰</span><span>Dessert Room</span></div>
+
+    <div class="sb-section">Manage</div>
+    <div class="sb-link" onclick="showPage('gallery',this)"><span class="sb-icon">🖼</span><span>Gallery</span></div>
+    <div class="sb-link" onclick="showPage('events',this)"><span class="sb-icon">📅</span><span>Events</span></div>
+    <div class="sb-link" onclick="showPage('settings',this)"><span class="sb-icon">⚙</span><span>Settings</span></div>
+
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-avatar">UC</div>
+        <div>
+          <div class="sb-username">Urban Cafe</div>
+          <div class="sb-role">Administrator</div>
+        </div>
+      </div>
+      <div class="sb-logout" onclick="doLogout()">Sign out</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub" id="dash-date"></div>
+        </div>
+        <div style="display:flex;gap:.8rem;align-items:center">
+          <span style="font-size:.6rem;color:var(--muted);letter-spacing:.12em">Lilongwe, Malawi</span>
+          <button class="btn btn-gold btn-sm" onclick="showPage('specials',document.querySelector('[onclick*=specials]'))">+ Add Special</button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Active Specials Today</div>
+          <div class="stat-val" id="s-count">8</div>
+          <div class="stat-sub">↑ Menu is live</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sold Out Items</div>
+          <div class="stat-val" id="s-sold" style="color:#E74C3C">1</div>
+          <div class="stat-sub">1 item marked sold out</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Urban Legends</div>
+          <div class="stat-val">6</div>
+          <div class="stat-sub">Permanent menu items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Order Phone</div>
+          <div class="stat-val" style="font-size:1rem;padding-top:.3rem">0998 969 594</div>
+          <div class="stat-sub">WhatsApp enabled</div>
+        </div>
+      </div>
+
+      <div class="sec-div">Quick Actions</div>
+      <div class="quick-grid">
+        <div class="quick-card" onclick="showPage('specials',document.querySelector('[onclick*=specials]'))">
+          <div class="quick-icon">🍽</div>
+          <div class="quick-label">Update Today's Menu</div>
+          <div class="quick-desc">Add, edit or mark dishes sold out</div>
+        </div>
+        <div class="quick-card" onclick="openAddModal()">
+          <div class="quick-icon">➕</div>
+          <div class="quick-label">Add New Dish</div>
+          <div class="quick-desc">Create a new special for today</div>
+        </div>
+        <div class="quick-card" onclick="showPage('gallery',document.querySelector('[onclick*=gallery]'))">
+          <div class="quick-icon">📸</div>
+          <div class="quick-label">Manage Gallery</div>
+          <div class="quick-desc">Upload new food photos</div>
+        </div>
+        <div class="quick-card" onclick="showPage('events',document.querySelector('[onclick*=events]'))">
+          <div class="quick-icon">📅</div>
+          <div class="quick-label">View Bookings</div>
+          <div class="quick-desc">Check upcoming event requests</div>
+        </div>
+        <div class="quick-card" onclick="showPage('desserts',document.querySelector('[onclick*=desserts]'))">
+          <div class="quick-icon">🍰</div>
+          <div class="quick-label">Update Cheesecakes</div>
+          <div class="quick-desc">Change today's cheesecake flavour</div>
+        </div>
+        <div class="quick-card" onclick="showPage('settings',document.querySelector('[onclick*=settings]'))">
+          <div class="quick-icon">⚙</div>
+          <div class="quick-label">Site Settings</div>
+          <div class="quick-desc">Hours, contact info, announcements</div>
+        </div>
+      </div>
+
+      <div class="sec-div">Recent Activity</div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#2ECC71"></div>
+          <div><div class="activity-text">Goat Curry added to today's specials · K32,000</div><div class="activity-time">Today, 08:14 AM</div></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#E74C3C"></div>
+          <div><div class="activity-text">Mushroom Risotto marked as Sold Out</div><div class="activity-time">Today, 11:32 AM</div></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--gold)"></div>
+          <div><div class="activity-text">Baked Cheesecake flavour updated → Lotus Biscoff &amp; Caramel · K22,000</div><div class="activity-time">Today, 07:55 AM</div></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#2ECC71"></div>
+          <div><div class="activity-text">Nashville Chicken Burger added · K29,500 · Marked as New</div><div class="activity-time">Yesterday, 06:45 PM</div></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--sage)"></div>
+          <div><div class="activity-text">New event booking enquiry received — Birthday party, 25 guests</div><div class="activity-time">Yesterday, 03:12 PM</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TODAY'S SPECIALS ── -->
+    <div class="page" id="page-specials">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Today's Specials</div>
+          <div class="page-sub">Manage daily menu · Changes every day</div>
+        </div>
+        <button class="btn btn-gold" onclick="openAddModal()">+ Add Dish</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <span class="table-title">Live Menu — <span id="special-count">8</span> dishes</span>
+          <div style="display:flex;gap:.6rem">
+            <input style="background:var(--bg);border:1px solid var(--border);color:var(--cream);padding:.4rem .8rem;font-family:'Josefin Sans',sans-serif;font-size:.68rem;outline:none;width:180px" placeholder="Search dishes..." id="search-input" oninput="filterTable()">
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="specials-table">
+          <colgroup>
+            <col style="width:24%"><col style="width:22%"><col style="width:10%">
+            <col style="width:10%"><col style="width:12%"><col style="width:10%"><col style="width:12%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Dish Name</th><th>Description</th><th>Price (MWK)</th>
+              <th>Category</th><th>Status</th><th>Sold Out</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="specials-body"></tbody>
+        </table>
+        </div>
+      </div>
+
+      <div style="margin-top:1.2rem;font-size:.6rem;color:var(--muted);letter-spacing:.12em">
+        Toggle "Sold Out" to instantly update the website. Changes reflect immediately.
+      </div>
+    </div>
+
+    <!-- ── URBAN LEGENDS ── -->
+    <div class="page" id="page-legends">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Urban Legends</div>
+          <div class="page-sub">Permanent signature menu — always available</div>
+        </div>
+        <button class="btn btn-gold" onclick="openLegendModal()">+ Add Legend</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar"><span class="table-title">Permanent Dishes</span></div>
+        <div style="overflow-x:auto">
+        <table>
+          <colgroup><col style="width:22%"><col style="width:20%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:10%"><col style="width:12%"></colgroup>
+          <thead><tr><th>Dish</th><th>Description</th><th>Price</th><th>Category</th><th>Badge</th><th>Active</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>Classic Beef Burger</td><td>House beef patty, cheddar, lettuce, tomato, special sauce</td><td style="color:var(--gold)">K28,000</td><td><span class="badge badge-new">Burgers</span></td><td style="color:var(--gold);font-size:.6rem">★ Legend</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><div style="display:flex;gap:.4rem"><button class="btn-icon" onclick="toast('Edit coming soon')">✏</button><button class="btn-icon btn-danger" onclick="toast('Deleted')">🗑</button></div></td></tr>
+            <tr><td>Steak Burrito Bowl</td><td>Grilled steak, black beans, corn, salsa, coriander lime rice</td><td style="color:var(--gold)">K38,000</td><td><span class="badge badge-new">Burrito Bowls</span></td><td style="color:var(--gold);font-size:.6rem">★ Legend</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><div style="display:flex;gap:.4rem"><button class="btn-icon" onclick="toast('Edit coming soon')">✏</button><button class="btn-icon btn-danger" onclick="toast('Deleted')">🗑</button></div></td></tr>
+            <tr><td>Battered Tilapia &amp; Chips</td><td>Crispy golden battered tilapia, coleslaw, tartar, chips</td><td style="color:var(--gold)">K35,000</td><td><span class="badge badge-veg">Fish &amp; Chips</span></td><td style="color:var(--gold);font-size:.6rem">★ Legend</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><div style="display:flex;gap:.4rem"><button class="btn-icon" onclick="toast('Edit coming soon')">✏</button><button class="btn-icon btn-danger" onclick="toast('Deleted')">🗑</button></div></td></tr>
+            <tr><td>Baked Cheesecake</td><td>Daily rotating flavours — always fresh baked</td><td style="color:var(--gold)">K22,000</td><td><span class="badge badge-new">Cheesecakes</span></td><td style="color:var(--gold);font-size:.6rem">★ Legend</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><div style="display:flex;gap:.4rem"><button class="btn-icon" onclick="toast('Edit coming soon')">✏</button><button class="btn-icon btn-danger" onclick="toast('Deleted')">🗑</button></div></td></tr>
+            <tr><td>Cinnamon Roll</td><td>Warm, soft and gooey with sweet icing. Mini also available</td><td style="color:var(--gold)">K7,500</td><td><span class="badge badge-veg">Cinnamon Rolls</span></td><td style="color:var(--gold);font-size:.6rem">★ Legend</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><div style="display:flex;gap:.4rem"><button class="btn-icon" onclick="toast('Edit coming soon')">✏</button><button class="btn-icon btn-danger" onclick="toast('Deleted')">🗑</button></div></td></tr>
+            <tr><td>Specialty Latte</td><td>House blend espresso with steamed milk and seasonal syrups</td><td style="color:var(--gold)">K6,500</td><td><span class="badge badge-new">Coffee</span></td><td style="color:var(--gold);font-size:.6rem">★ Legend</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><div style="display:flex;gap:.4rem"><button class="btn-icon" onclick="toast('Edit coming soon')">✏</button><button class="btn-icon btn-danger" onclick="toast('Deleted')">🗑</button></div></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COFFEE BAR ── -->
+    <div class="page" id="page-coffee">
+      <div class="page-header">
+        <div><div class="page-title">Coffee Bar</div><div class="page-sub">Manage coffee menu &amp; prices</div></div>
+        <button class="btn btn-gold" onclick="toast('Add coffee item modal')">+ Add Coffee</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar"><span class="table-title">Coffee Drinks</span></div>
+        <table>
+          <colgroup><col style="width:20%"><col style="width:25%"><col style="width:15%"><col style="width:15%"><col style="width:15%"><col style="width:10%"></colgroup>
+          <thead><tr><th>Name</th><th>Description</th><th>Small</th><th>Regular</th><th>Large</th><th>Active</th></tr></thead>
+          <tbody>
+            <tr><td>Espresso</td><td>Pure concentrated shot of house blend</td><td style="color:var(--gold)">K3,500</td><td style="color:var(--gold)">K4,500</td><td style="color:var(--muted)">—</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Americano</td><td>Espresso with hot water, clean and bold</td><td style="color:var(--gold)">K4,000</td><td style="color:var(--gold)">K5,000</td><td style="color:var(--gold)">K6,000</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Flat White</td><td>Double espresso with velvety microfoam milk</td><td style="color:var(--gold)">K4,500</td><td style="color:var(--gold)">K5,500</td><td style="color:var(--gold)">K6,500</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Cappuccino</td><td>Espresso, steamed milk and thick foam</td><td style="color:var(--gold)">K4,500</td><td style="color:var(--gold)">K5,500</td><td style="color:var(--gold)">K6,500</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Latte</td><td>Espresso with lots of steamed milk</td><td style="color:var(--gold)">K4,750</td><td style="color:var(--gold)">K5,750</td><td style="color:var(--gold)">K6,750</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Mocha</td><td>Espresso, chocolate sauce and steamed milk</td><td style="color:var(--gold)">K5,000</td><td style="color:var(--gold)">K6,000</td><td style="color:var(--gold)">K7,000</td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── DRINKS ── -->
+    <div class="page" id="page-drinks">
+      <div class="page-header">
+        <div><div class="page-title">Drinks Menu</div><div class="page-sub">Milkshakes, smoothies, frappes &amp; more</div></div>
+        <button class="btn btn-gold" onclick="toast('Add drink modal')">+ Add Drink</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar"><span class="table-title">All Drinks</span></div>
+        <table>
+          <colgroup><col style="width:22%"><col style="width:28%"><col style="width:15%"><col style="width:15%"><col style="width:10%"><col style="width:10%"></colgroup>
+          <thead><tr><th>Name</th><th>Description</th><th>Price</th><th>Category</th><th>Active</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>Chocolate Milkshake</td><td>Rich creamy chocolate blend with whipped cream</td><td style="color:var(--gold)">K12,000</td><td><span class="badge badge-new">Milkshakes</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Strawberry Smoothie</td><td>Fresh strawberries blended with yogurt and honey</td><td style="color:var(--gold)">K10,000</td><td><span class="badge badge-veg">Smoothies</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Mango Smoothie</td><td>Fresh Malawian mango, coconut milk, lime</td><td style="color:var(--gold)">K10,000</td><td><span class="badge badge-veg">Smoothies</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Vanilla Frappe</td><td>Blended iced coffee with vanilla and cream</td><td style="color:var(--gold)">K13,000</td><td><span class="badge badge-new">Frappes</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Passion Iced Tea</td><td>Hibiscus passion fruit tea over ice</td><td style="color:var(--gold)">K8,000</td><td><span class="badge badge-veg">Iced Teas</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── DESSERTS ── -->
+    <div class="page" id="page-desserts">
+      <div class="page-header">
+        <div><div class="page-title">Dessert Room</div><div class="page-sub">Cheesecakes, cinnamon rolls &amp; sweet treats</div></div>
+        <button class="btn btn-gold" onclick="toast('Add dessert')">+ Add Dessert</button>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border2);padding:1.4rem;margin-bottom:1.5rem">
+        <div style="font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem">Today's Cheesecake Flavour</div>
+        <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+          <input class="form-input" style="max-width:280px" id="cheesecake-today" value="Lotus Biscoff &amp; Caramel" placeholder="Enter today's flavour">
+          <input class="form-input" style="max-width:120px" id="cheesecake-price" value="22000" placeholder="Price (MWK)">
+          <button class="btn btn-gold btn-sm" onclick="updateCheesecake()">Update Flavour</button>
+        </div>
+        <div style="font-size:.58rem;color:var(--muted);margin-top:.6rem">This updates instantly on the website · Previous: Raspberry Lemon Swirl</div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar"><span class="table-title">All Desserts</span></div>
+        <table>
+          <colgroup><col style="width:22%"><col style="width:30%"><col style="width:15%"><col style="width:13%"><col style="width:10%"><col style="width:10%"></colgroup>
+          <thead><tr><th>Name</th><th>Description</th><th>Price</th><th>Type</th><th>Available</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>Baked Cheesecake</td><td>Today: Lotus Biscoff &amp; Caramel — made fresh daily</td><td style="color:var(--gold)">K22,000</td><td><span class="badge badge-new">Cheesecake</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Cinnamon Roll</td><td>Warm soft gooey cinnamon roll with sweet icing</td><td style="color:var(--gold)">K7,500</td><td><span class="badge badge-veg">Baked</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Mini Cinnamon Roll</td><td>Smaller portion — great with coffee</td><td style="color:var(--gold)">K4,500</td><td><span class="badge badge-veg">Baked</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Brownie</td><td>Rich, fudgy &amp; chocolatey goodness</td><td style="color:var(--gold)">K8,000</td><td><span class="badge badge-new">Chocolate</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+            <tr><td>Malva Pudding</td><td>Warm sticky South African sponge with custard</td><td style="color:var(--gold)">K15,000</td><td><span class="badge badge-new">Hot Dessert</span></td><td><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><button class="btn-icon" onclick="toast('Edit')">✏</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── GALLERY ── -->
+    <div class="page" id="page-gallery">
+      <div class="page-header">
+        <div><div class="page-title">Gallery</div><div class="page-sub">Manage food photography &amp; cafe images</div></div>
+        <button class="btn btn-gold" onclick="toast('Upload photo')">+ Upload Photo</button>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border2);border-style:dashed;padding:3rem;text-align:center;margin-bottom:1.5rem;cursor:pointer" onclick="toast('File picker would open here')">
+        <div style="font-size:2.5rem;margin-bottom:.8rem">📸</div>
+        <div style="font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">Drag &amp; drop photos here or click to browse</div>
+        <div style="font-size:.58rem;color:var(--muted);margin-top:.4rem">JPG, PNG, WebP · Max 5MB per image</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem">
+        <div id="gallery-grid"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem" id="gallery-photos">
+        <!-- injected by JS -->
+      </div>
+    </div>
+
+    <!-- ── EVENTS ── -->
+    <div class="page" id="page-events">
+      <div class="page-header">
+        <div><div class="page-title">Events &amp; Bookings</div><div class="page-sub">Private bookings, birthday parties &amp; corporate events</div></div>
+      </div>
+      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card"><div class="stat-label">Pending Enquiries</div><div class="stat-val" style="color:var(--gold)">3</div><div class="stat-sub">Awaiting response</div></div>
+        <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-val">2</div><div class="stat-sub">Confirmed events</div></div>
+        <div class="stat-card"><div class="stat-label">Capacity</div><div class="stat-val">40</div><div class="stat-sub">Max guests (private)</div></div>
+      </div>
+      <div class="table-wrap" style="margin-top:1.5rem">
+        <div class="table-toolbar"><span class="table-title">Booking Enquiries</span></div>
+        <table>
+          <colgroup><col style="width:18%"><col style="width:15%"><col style="width:12%"><col style="width:15%"><col style="width:22%"><col style="width:18%"></colgroup>
+          <thead><tr><th>Name</th><th>Event Type</th><th>Guests</th><th>Date</th><th>Contact</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Sarah Mwale</td><td>Birthday Party</td><td>25</td><td>15 Jul 2024</td><td>0991 234 567</td><td><span class="badge badge-new">Pending</span></td></tr>
+            <tr><td>Chioma Banda</td><td>Corporate Lunch</td><td>15</td><td>20 Jul 2024</td><td>0888 765 432</td><td><span class="badge badge-live">Confirmed</span></td></tr>
+            <tr><td>James Phiri</td><td>Anniversary Dinner</td><td>8</td><td>22 Jul 2024</td><td>0995 111 222</td><td><span class="badge badge-new">Pending</span></td></tr>
+            <tr><td>Zanele Dube</td><td>Baby Shower</td><td>30</td><td>28 Jul 2024</td><td>0882 333 444</td><td><span class="badge badge-live">Confirmed</span></td></tr>
+            <tr><td>Mphatso Tembo</td><td>Birthday Party</td><td>20</td><td>03 Aug 2024</td><td>0993 555 666</td><td><span class="badge badge-new">Pending</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div><div class="page-title">Site Settings</div><div class="page-sub">Opening hours, contact info &amp; announcements</div></div>
+        <button class="btn btn-gold" onclick="saveSettings()">Save Changes</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div style="background:var(--card);border:1px solid var(--border);padding:1.5rem">
+          <div class="sec-div" style="margin-top:0">Contact Information</div>
+          <div class="form-group"><label class="form-label">Order Phone / WhatsApp</label><input class="form-input" value="0998969594"></div>
+          <div class="form-group"><label class="form-label">Facebook Page</label><input class="form-input" value="Urban Cafe"></div>
+          <div class="form-group"><label class="form-label">Location</label><input class="form-input" value="Lilongwe, Malawi"></div>
+          <div class="form-group"><label class="form-label">Instagram Handle</label><input class="form-input" value="@urbancafe.mw" placeholder="@yourhandle"></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);padding:1.5rem">
+          <div class="sec-div" style="margin-top:0">Opening Hours</div>
+          <div class="form-group"><label class="form-label">Monday – Friday</label><input class="form-input" value="07:00 – 21:00"></div>
+          <div class="form-group"><label class="form-label">Saturday</label><input class="form-input" value="08:00 – 21:00"></div>
+          <div class="form-group"><label class="form-label">Sunday</label><input class="form-input" value="09:00 – 19:00"></div>
+          <div class="form-group"><label class="form-label">Public Holidays</label><input class="form-input" value="10:00 – 17:00"></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);padding:1.5rem;grid-column:1/-1">
+          <div class="sec-div" style="margin-top:0">Site Announcement Banner</div>
+          <div class="form-group"><label class="form-label">Banner Message (shown on website)</label><input class="form-input" value="" placeholder="e.g. Closed this afternoon for a private event — re-opening at 6PM"></div>
+          <div style="display:flex;align-items:center;gap:1rem">
+            <label class="form-label" style="margin:0">Show banner on website</label>
+            <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .main -->
+</div><!-- end #app -->
+
+<!-- ══════════════════════════════════
+     ADD DISH MODAL
+════════════════════════════════════ -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title-text">Add Today's Special</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Dish Name *</label><input class="form-input" id="m-name" placeholder="e.g. Goat Curry"></div>
+        <div class="form-group"><label class="form-label">Category *</label>
+          <select class="form-select" id="m-cat">
+            <option>Chef's Special</option><option>Burgers</option><option>Burrito Bowls</option>
+            <option>Seafood</option><option>Fish</option><option>Grill</option>
+            <option>Brunch</option><option>Dessert</option><option>Vegan</option><option>Pasta</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Description *</label><textarea class="form-textarea" id="m-desc" placeholder="Describe the dish — ingredients, cooking method, served with..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Price (MWK) *</label><input class="form-input" id="m-price" type="number" placeholder="e.g. 32000"></div>
+        <div class="form-group"><label class="form-label">Dietary Tag</label>
+          <select class="form-select" id="m-tag">
+            <option value="Signature">Signature</option><option value="New!">New!</option>
+            <option value="Vegan">Vegan</option><option value="Vegetarian">Vegetarian</option>
+            <option value="Seafood">Seafood</option><option value="Fan Fave">Fan Fave</option>
+            <option value="Gluten Free">Gluten Free</option><option value="Spicy">Spicy</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Sub Option (optional)</label><input class="form-input" id="m-sub" placeholder="e.g. Sub steak for chicken K35,000"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="addDish()">Add to Today's Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND MODAL -->
+<div class="modal-overlay" id="legend-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Urban Legend</div>
+      <button class="modal-close" onclick="document.getElementById('legend-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Dish Name</label><input class="form-input" placeholder="Dish name"></div>
+        <div class="form-group"><label class="form-label">Category</label>
+          <select class="form-select"><option>Burgers</option><option>Burrito Bowls</option><option>Fish &amp; Chips</option><option>Cheesecakes</option><option>Cinnamon Rolls</option><option>Coffee Specials</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" placeholder="Permanent dish description..."></textarea></div>
+      <div class="form-group"><label class="form-label">Price (MWK)</label><input class="form-input" type="number" placeholder="e.g. 28000"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('legend-modal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-gold" onclick="toast('Urban Legend added!');document.getElementById('legend-modal').classList.remove('open')">Add Legend</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ── DATA ── */
+let dishes = [
+  {id:1,name:'Goat Curry',desc:'Tender goat slow-cooked in aromatic curry with chapati, sweet rice and raita.',price:32000,cat:"Chef's Special",tag:'Signature',soldOut:false},
+  {id:2,name:'Nashville Chicken Burger',desc:'Fried chicken breast with coleslaw on a buttery brioche bun.',price:29500,cat:'Burgers',tag:'New!',soldOut:false},
+  {id:3,name:'Seafood Rice',desc:'Fragrant rice with prawns, calamari, fish and clams, herbs and spices.',price:45000,cat:'Seafood',tag:'Seafood',soldOut:false},
+  {id:4,name:'Battered Tilapia & Chips',desc:'Crispy golden tilapia with coleslaw, tartar and chips.',price:35000,cat:'Fish',tag:'Local Fave',soldOut:false},
+  {id:5,name:'Asian Steak Bowl',desc:'Fillet in gochujang-soy glaze over rice with avocado and edamame.',price:38000,cat:'Grill',tag:'Bold',soldOut:false},
+  {id:6,name:'Honey-Chipotle Chicken Bowl',desc:'Shredded chipotle chicken over quinoa, salsa, corn, black beans, guac.',price:38000,cat:'Burrito Bowl',tag:'Fan Fave',soldOut:false},
+  {id:7,name:'Sourdough French Toast',desc:'House sourdough baked in custard with vanilla cream and syrup.',price:18000,cat:'Brunch',tag:'Brunch',soldOut:false},
+  {id:8,name:'Baked Cheesecake',desc:'Lotus Biscoff & Caramel — made fresh daily.',price:22000,cat:'Dessert',tag:'Made Fresh',soldOut:false},
+];
+
+let nextId = 9;
+
+/* ── LOGIN ── */
+function doLogin(){
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pass').value.trim();
+  if(u==='admin'&&p==='cafe2024'){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    renderSpecials();
+    renderGallery();
+  } else {
+    document.getElementById('l-err').textContent='Incorrect username or password.';
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('l-pass').value='';
+  document.getElementById('l-err').textContent='';
+}
+
+/* ── NAV ── */
+function showPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+/* ── RENDER SPECIALS TABLE ── */
+function renderSpecials(filter=''){
+  const tbody=document.getElementById('specials-body');
+  const filtered=dishes.filter(d=>d.name.toLowerCase().includes(filter.toLowerCase())||d.cat.toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('special-count').textContent=dishes.length;
+  document.getElementById('s-count').textContent=dishes.filter(d=>!d.soldOut).length;
+  document.getElementById('s-sold').textContent=dishes.filter(d=>d.soldOut).length;
+  tbody.innerHTML=filtered.map(d=>`
+    <tr id="row-${d.id}" class="${d.soldOut?'sold-row':''}">
+      <td style="${d.soldOut?'text-decoration:line-through;opacity:.5':''}font-weight:500">${d.name}</td>
+      <td style="font-size:.65rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.desc}</td>
+      <td style="color:var(--gold)">K${d.price.toLocaleString()}</td>
+      <td><span class="badge badge-new" style="font-size:.48rem">${d.cat}</span></td>
+      <td>${d.soldOut?'<span class="badge badge-sold">Sold Out</span>':'<span class="badge badge-live">Live</span>'}</td>
+      <td><label class="toggle"><input type="checkbox" ${d.soldOut?'checked':''} onchange="toggleSoldOut(${d.id},this.checked)"><span class="toggle-slider"></span></label></td>
+      <td><div style="display:flex;gap:.4rem">
+        <button class="btn-icon" onclick="editDish(${d.id})" title="Edit">✏</button>
+        <button class="btn-icon btn-danger" onclick="deleteDish(${d.id})" title="Delete">🗑</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function filterTable(){
+  renderSpecials(document.getElementById('search-input').value);
+}
+
+function toggleSoldOut(id,checked){
+  const d=dishes.find(x=>x.id===id);
+  if(d){d.soldOut=checked;renderSpecials(document.getElementById('search-input').value);toast(checked?`"${d.name}" marked Sold Out`:`"${d.name}" is now Live`);}
+}
+
+function deleteDish(id){
+  const d=dishes.find(x=>x.id===id);
+  if(d&&confirm(`Delete "${d.name}" from today's menu?`)){
+    dishes=dishes.filter(x=>x.id!==id);
+    renderSpecials();
+    toast(`"${d.name}" removed from menu`);
+  }
+}
+
+/* ── ADD / EDIT MODAL ── */
+let editingId=null;
+function openAddModal(){
+  editingId=null;
+  document.getElementById('modal-title-text').textContent="Add Today's Special";
+  ['m-name','m-desc','m-price','m-sub'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('add-modal').classList.add('open');
+}
+function editDish(id){
+  const d=dishes.find(x=>x.id===id);
+  if(!d)return;
+  editingId=id;
+  document.getElementById('modal-title-text').textContent='Edit Dish';
+  document.getElementById('m-name').value=d.name;
+  document.getElementById('m-desc').value=d.desc;
+  document.getElementById('m-price').value=d.price;
+  document.getElementById('m-tag').value=d.tag;
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('add-modal').classList.remove('open')}
+function addDish(){
+  const name=document.getElementById('m-name').value.trim();
+  const desc=document.getElementById('m-desc').value.trim();
+  const price=parseInt(document.getElementById('m-price').value)||0;
+  const cat=document.getElementById('m-cat').value;
+  const tag=document.getElementById('m-tag').value;
+  if(!name||!desc||!price){toast('Please fill in all required fields');return;}
+  if(editingId){
+    const d=dishes.find(x=>x.id===editingId);
+    if(d){Object.assign(d,{name,desc,price,cat,tag});}
+    toast(`"${name}" updated`);
+  } else {
+    dishes.push({id:nextId++,name,desc,price,cat,tag,soldOut:false});
+    toast(`"${name}" added to today's menu · K${price.toLocaleString()}`);
+  }
+  closeModal();
+  renderSpecials();
+}
+function openLegendModal(){document.getElementById('legend-modal').classList.add('open')}
+
+/* ── GALLERY ── */
+const galleryItems=[
+  {emoji:'🍛',label:'Goat Curry'},
+  {emoji:'🍔',label:'Nashville Burger'},
+  {emoji:'🍤',label:'Seafood Rice'},
+  {emoji:'🍰',label:'Cheesecake'},
+  {emoji:'🥐',label:'Cinnamon Roll'},
+  {emoji:'☕',label:'Specialty Coffee'},
+  {emoji:'🥗',label:'Quinoa Bowl'},
+  {emoji:'🐟',label:'Tilapia & Chips'},
+];
+function renderGallery(){
+  const g=document.getElementById('gallery-photos');
+  g.innerHTML=galleryItems.map(i=>`
+    <div style="background:var(--card);border:1px solid var(--border);padding:1rem;text-align:center;cursor:pointer;transition:border-color .3s" onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border)'">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">${i.emoji}</div>
+      <div style="font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">${i.label}</div>
+      <div style="display:flex;justify-content:center;gap:.4rem;margin-top:.6rem">
+        <button class="btn-icon" onclick="toast('Edit photo')" style="width:26px;height:26px;font-size:.7rem">✏</button>
+        <button class="btn-icon btn-danger" onclick="toast('Photo deleted')" style="width:26px;height:26px;font-size:.7rem">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ── CHEESECAKE UPDATE ── */
+function updateCheesecake(){
+  const f=document.getElementById('cheesecake-today').value.trim();
+  const p=document.getElementById('cheesecake-price').value;
+  if(f) toast(`Cheesecake updated → ${f} · K${parseInt(p).toLocaleString()}`);
+}
+
+/* ── SETTINGS SAVE ── */
+function saveSettings(){toast('Settings saved successfully')}
+
+/* ── TOAST ── */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
