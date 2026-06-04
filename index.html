@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Urban Cafe — Freshly Prepared. Made Today. | Lilongwe, Malawi</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@100;200;300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 /* ============================================================
    URBAN CAFE — COMPLETE WEBSITE
    Malawi · Premium Dark Theme · 3D Animations · LIVE MAP · LOGO
+   WebGL Shader Background (warm gold plasma lines)
    ============================================================ */
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -68,13 +70,13 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* 3D Canvas Background */
-#canvas-hero {
+/* WebGL Shader Canvas — fixed behind everything */
+#shader-canvas {
   position: fixed;
   top: 0;
   left: 0;
@@ -82,6 +84,24 @@ body {
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  opacity: 0.65;
+}
+
+/* Three.js Canvas — fixed on top of shader, only visible during hero */
+#canvas-hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+
+#canvas-hero.hidden {
+  opacity: 0;
 }
 
 /* Navigation */
@@ -161,7 +181,6 @@ nav {
   transform: scale(1.02);
 }
 
-
 /* Side Navigation Dots */
 .page-nav {
   position: fixed;
@@ -217,6 +236,8 @@ nav {
   opacity: 0;
   transform: translateY(20px);
   animation: fadeUp 0.9s 0.2s forwards;
+  background: rgba(26, 15, 13, 0.45);
+  backdrop-filter: blur(4px);
 }
 
 .hero-badge::before,
@@ -239,24 +260,25 @@ nav {
   opacity: 0;
   transform: translateY(30px);
   animation: fadeUp 1s 0.45s forwards;
-  text-shadow: 0 0 120px rgba(212, 161, 90, 0.2);
+  text-shadow: 0 0 120px rgba(212, 161, 90, 0.2), 0 2px 40px rgba(0,0,0,0.6);
 }
 
 .hero-title .gold {
   color: var(--gold);
-  text-shadow: 0 0 15px rgba(212, 161, 90, 0.6);
+  text-shadow: 0 0 20px rgba(212, 161, 90, 0.7), 0 2px 40px rgba(0,0,0,0.6);
 }
 
 .hero-subtitle {
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(1.3rem, 3vw, 1.9rem);
   font-style: italic;
-  color: rgba(245, 241, 235, 0.82);
+  color: rgba(245, 241, 235, 0.88);
   margin-top: 1.3rem;
   line-height: 1.4;
   opacity: 0;
   transform: translateY(20px);
   animation: fadeUp 0.9s 0.7s forwards;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.7);
 }
 
 .hero-desc {
@@ -765,9 +787,10 @@ nav {
   border-radius: 30px;
   font-size: 0.7rem;
   letter-spacing: 0.1em;
+  color: var(--gold);
 }
 
-/* Footer *//* Footer Styles */
+/* Footer */
 footer {
   position: relative;
   z-index: 10;
@@ -898,7 +921,6 @@ footer {
   padding: 0.2rem 0;
 }
 
-/* HOVER COLOR EFFECT - Changes to Gold on hover */
 .footer-links a:hover {
   color: var(--gold);
   transform: translateX(5px);
@@ -926,7 +948,6 @@ footer {
   font-size: 0.9rem;
 }
 
-/* SOCIAL BUTTON HOVER - Changes background and color */
 .social-btn:hover {
   border-color: var(--gold);
   background: var(--gold);
@@ -934,57 +955,11 @@ footer {
   transform: translateY(-3px);
 }
 
-.gold-line {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(212, 161, 90, 0.3), transparent);
-  margin: 1.5rem 0;
-}
-
 .footer-copy {
   text-align: center;
   font-size: 0.55rem;
   color: rgba(245, 241, 235, 0.25);
   letter-spacing: 0.1em;
-}
-
-/* Responsive Footer */
-@media (max-width: 768px) {
-  footer {
-    padding: 2rem 1.5rem;
-  }
-  
-  .footer-container {
-    flex-direction: column;
-    gap: 2rem;
-  }
-  
-  .footer-column-left,
-  .footer-column-right {
-    text-align: center;
-  }
-  
-  .footer-logo {
-    justify-content: center;
-  }
-  
-  .footer-column-right h4::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .footer-links {
-    grid-template-columns: repeat(2, 1fr);
-    text-align: center;
-  }
-  
-  .footer-links a:hover {
-    transform: translateX(0);
-  }
-  
-  .footer-social {
-    justify-content: center;
-  }
 }
 
 /* Animations */
@@ -1019,6 +994,14 @@ footer {
   .page-nav { display: none; }
   .specials-grid, .coffee-grid, .drinks-grid, .events-grid, .legends-grid { grid-template-columns: 1fr; }
   .map-container iframe { height: 300px; }
+  footer { padding: 2rem 1.5rem; }
+  .footer-container { flex-direction: column; gap: 2rem; }
+  .footer-column-left, .footer-column-right { text-align: center; }
+  .footer-logo { justify-content: center; }
+  .footer-column-right h4::after { left: 50%; transform: translateX(-50%); }
+  .footer-links { grid-template-columns: repeat(2, 1fr); text-align: center; }
+  .footer-links a:hover { transform: translateX(0); }
+  .footer-social { justify-content: center; }
 }
 </style>
 </head>
@@ -1027,6 +1010,17 @@ footer {
 <div id="cursor"></div>
 <div id="cursor-ring"></div>
 <div class="noise"></div>
+
+<!-- ═══════════════════════════════════
+     LAYER 1: WebGL Shader (fixed, z-index 0)
+     Warm gold plasma lines on espresso background
+═══════════════════════════════════ -->
+<canvas id="shader-canvas"></canvas>
+
+<!-- ═══════════════════════════════════
+     LAYER 2: Three.js Coffee Cup (fixed, z-index 1)
+     Fades out when user scrolls past hero
+═══════════════════════════════════ -->
 <canvas id="canvas-hero"></canvas>
 
 <!-- Navigation with LOGO -->
@@ -1063,10 +1057,10 @@ footer {
   <h1 class="hero-title">URBAN<br><span class="gold">CAFE</span></h1>
   <p class="hero-subtitle">Freshly Prepared. Made Today.</p>
   <p class="hero-desc">Serving freshly prepared meals, specialty coffee, smoothies, milkshakes, frappes & daily chef specials.</p>
- <div class="hero-btns">
-  <button class="btn-primary" onclick="location.href='menu.html'">Get Started</button>
-  <button class="btn-secondary" onclick="document.getElementById('map').scrollIntoView({behavior:'smooth'})">Get Directions</button>
-</div>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="location.href='menu.html'">Get Started</button>
+    <button class="btn-secondary" onclick="document.getElementById('map').scrollIntoView({behavior:'smooth'})">Get Directions</button>
+  </div>
   <p class="hero-order-note">Order for delivery or collection → <a href="tel:0998969594">0998 969 594</a> &nbsp;|&nbsp; <a href="https://wa.me/265998969594" target="_blank">WhatsApp us</a></p>
   <div class="scroll-indicator">
     <div class="scroll-line"></div>
@@ -1125,7 +1119,7 @@ footer {
 
 <div class="gold-divider"></div>
 
-<!-- URBAN LEGENDS SECTION - FULLY RESTORED -->
+<!-- URBAN LEGENDS SECTION -->
 <section class="legends-section" id="legends">
   <div class="section-header">
     <span class="section-tag">Permanent Menu</span>
@@ -1181,7 +1175,7 @@ footer {
   <div class="coffee-grid">
     <div class="coffee-card reveal"><img class="coffee-img" src="Espresso.jpg" alt="Espresso"><div class="coffee-name">Espresso</div></div>
     <div class="coffee-card reveal"><img class="coffee-img" src="Americano.jpg" alt="Americano"><div class="coffee-name">Americano</div></div>
-    <div class="coffee-card reveal"><img class="coffee-img" src="Flat White.jpg" alt="flat white"><div class="coffee-name">Flat White</div></div>
+    <div class="coffee-card reveal"><img class="coffee-img" src="Flat White.jpg" alt="Flat White"><div class="coffee-name">Flat White</div></div>
     <div class="coffee-card reveal"><img class="coffee-img" src="Cappuccino.jpg" alt="Cappuccino"><div class="coffee-name">Cappuccino</div></div>
     <div class="coffee-card reveal"><img class="coffee-img" src="Mocha1.jpg" alt="Mocha"><div class="coffee-name">Mocha</div></div>
     <div class="coffee-card reveal"><img class="coffee-img" src="Latte.jpg" alt="Latte"><div class="coffee-name">Latte</div></div>
@@ -1260,9 +1254,9 @@ footer {
     <div class="gold-line"></div>
   </div>
   <div class="map-container reveal">
-    <iframe 
+    <iframe
       src="https://www.google.com/maps?q=-13.93551,33.797272&hl=en&z=15&output=embed"
-      allowfullscreen="" 
+      allowfullscreen=""
       loading="lazy">
     </iframe>
   </div>
@@ -1281,13 +1275,11 @@ footer {
       <p>Mon-Sun: 8 AM - 5 PM</p>
       <p>Private events available after hours</p>
     </div>
-   
   </div>
 </section>
 
 <!-- Footer -->
 <footer>
-
   <div class="footer-container">
     <!-- LEFT SIDE: Logo, Tagline, Address, Social, Contact -->
     <div class="footer-column-left">
@@ -1297,13 +1289,11 @@ footer {
       </div>
       <p class="footer-tagline">Freshly Prepared. Made Today.</p>
       <p class="footer-address">Area 10 - Off Majaete Road, Zomba Street, Lilongwe, Malawi</p>
-      
       <div class="footer-contact-info">
         <p><i class="fas fa-phone"></i> <a href="tel:0998969594">0998 969 594</a></p>
         <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/265998969594">0998 969 594</a></p>
         <p><i class="fas fa-envelope"></i> <a href="mailto:info@urbancafe.mw">info@urbancafe.mw</a></p>
       </div>
-      
       <div class="footer-social">
         <a class="social-btn" href="https://facebook.com/urbancafellw" target="_blank"><i class="fab fa-facebook-f"></i></a>
         <a class="social-btn" href="https://wa.me/265998969594" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -1312,7 +1302,7 @@ footer {
       </div>
     </div>
 
-    <!-- RIGHT SIDE: Gallery, Reservations, Events, Reviews, Rewards, Order, Vouchers, About, Contact -->
+    <!-- RIGHT SIDE: Navigation Links -->
     <div class="footer-column-right">
       <h4>Quick Navigation</h4>
       <div class="footer-links">
@@ -1328,39 +1318,178 @@ footer {
       </div>
     </div>
   </div>
-
   <div class="gold-line"></div>
   <p class="footer-copy">© 2025 Urban Cafe · Lilongwe, Malawi · 0998 969 594</p>
-
 </footer>
 
-<!-- Three.js and Interactions -->
+
+<!-- ═══════════════════════════════════════════════════════
+     SCRIPTS
+     1. WebGL Shader (layer 1 — always on, full page)
+     2. Three.js Coffee Cup (layer 2 — hero only, fades on scroll)
+     3. Cursor · Reveal · Tilt · Nav Dots
+════════════════════════════════════════════════════════ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Custom cursor
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursor-ring');
-let mx = 0, my = 0, rx = 0, ry = 0;
 
-document.addEventListener('mousemove', function(e) {
-  mx = e.clientX;
-  my = e.clientY;
-  cursor.style.left = mx + 'px';
-  cursor.style.top = my + 'px';
-});
+/* ═══════════════════════════════════
+   1. WEBGL SHADER BACKGROUND
+   Warm gold plasma lines on espresso
+   Adapted from ShaderBackground.jsx
+═══════════════════════════════════ */
+(function initShader() {
 
-setInterval(function() {
-  rx += (mx - rx) * 0.11;
-  ry += (my - ry) * 0.11;
-  ring.style.left = rx + 'px';
-  ring.style.top = ry + 'px';
-}, 16);
+  const vsSource = `
+    attribute vec4 aVertexPosition;
+    void main() {
+      gl_Position = aVertexPosition;
+    }
+  `;
 
-// Three.js 3D Scene
-const canvas = document.getElementById('canvas-hero');
-const renderer = new THREE.WebGLRenderer({ canvas, alpha: false });
+  /* Colours remapped to Urban Cafe palette:
+     background  → deep espresso  #1A0F0D
+     line colour → warm gold      #D4A15A  */
+  const fsSource = `
+    precision highp float;
+    uniform vec2  iResolution;
+    uniform float iTime;
+
+    const float overallSpeed       = 0.18;
+    const float gridSmoothWidth    = 0.015;
+    const float axisWidth          = 0.05;
+    const float majorLineWidth     = 0.025;
+    const float minorLineWidth     = 0.0125;
+    const float majorLineFrequency = 5.0;
+    const float minorLineFrequency = 1.0;
+    const float scale              = 5.0;
+    const vec4  lineColor          = vec4(0.83, 0.63, 0.35, 1.0);
+    const float minLineWidth       = 0.008;
+    const float maxLineWidth       = 0.18;
+    const float lineSpeed          = 1.0  * overallSpeed;
+    const float lineAmplitude      = 1.0;
+    const float lineFrequency      = 0.2;
+    const float warpSpeed          = 0.2  * overallSpeed;
+    const float warpFrequency      = 0.5;
+    const float warpAmplitude      = 1.0;
+    const float offsetFrequency    = 0.5;
+    const float offsetSpeed        = 1.33 * overallSpeed;
+    const float minOffsetSpread    = 0.6;
+    const float maxOffsetSpread    = 2.0;
+    const int   linesPerGroup      = 16;
+
+    #define drawSmoothLine(pos,hw,t) smoothstep(hw, 0.0, abs(pos-(t)))
+    #define drawCrispLine(pos,hw,t)  smoothstep(hw+gridSmoothWidth, hw, abs(pos-(t)))
+    #define drawCircle(pos,r,c)      smoothstep(r+gridSmoothWidth, r, length(c-(pos)))
+
+    float random(float t) {
+      return (cos(t) + cos(t*1.3+1.3) + cos(t*1.4+1.4)) / 3.0;
+    }
+
+    float plasmaY(float x, float hFade, float offset) {
+      return random(x * lineFrequency + iTime * lineSpeed) * hFade * lineAmplitude + offset;
+    }
+
+    void main() {
+      vec2 uv    = gl_FragCoord.xy / iResolution.xy;
+      vec2 space = (gl_FragCoord.xy - iResolution.xy * 0.5) / iResolution.x * 2.0 * scale;
+
+      float hFade = 1.0 - (cos(uv.x * 6.28318) * 0.5 + 0.5);
+      float vFade = 1.0 - (cos(uv.y * 6.28318) * 0.5 + 0.5);
+
+      space.y += random(space.x * warpFrequency + iTime * warpSpeed) * warpAmplitude * (0.5 + hFade);
+      space.x += random(space.y * warpFrequency + iTime * warpSpeed + 2.0) * warpAmplitude * hFade;
+
+      /* Deep espresso gradient */
+      vec4 bg = mix(vec4(0.10, 0.06, 0.05, 1.0), vec4(0.18, 0.11, 0.09, 1.0), uv.x);
+      vec4 lines = vec4(0.0);
+
+      for (int l = 0; l < linesPerGroup; l++) {
+        float ni     = float(l) / float(linesPerGroup);
+        float oTime  = iTime * offsetSpeed;
+        float oPos   = float(l) + space.x * offsetFrequency;
+        float rand   = random(oPos + oTime) * 0.5 + 0.5;
+        float hw     = mix(minLineWidth, maxLineWidth, rand * hFade) * 0.5;
+        float offset = random(oPos + oTime * (1.0 + ni)) * mix(minOffsetSpread, maxOffsetSpread, hFade);
+        float lp     = plasmaY(space.x, hFade, offset);
+        float line   = drawSmoothLine(lp, hw, space.y) * 0.5
+                     + drawCrispLine(lp, hw * 0.15, space.y);
+        float cx     = mod(float(l) + iTime * lineSpeed, 25.0) - 12.0;
+        vec2  cp     = vec2(cx, plasmaY(cx, hFade, offset));
+        float circle = drawCircle(cp, 0.01, space) * 4.0;
+        lines       += (line + circle) * lineColor * rand;
+      }
+
+      vec4 col  = bg * vFade;
+      col.a     = 1.0;
+      col      += lines;
+      gl_FragColor = col;
+    }
+  `;
+
+  const canvas = document.getElementById('shader-canvas');
+  const gl     = canvas.getContext('webgl');
+  if (!gl) { console.warn('WebGL not supported'); return; }
+
+  function makeShader(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(s)); gl.deleteShader(s); return null;
+    }
+    return s;
+  }
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, makeShader(gl.VERTEX_SHADER,   vsSource));
+  gl.attachShader(prog, makeShader(gl.FRAGMENT_SHADER, fsSource));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error(gl.getProgramInfoLog(prog)); return;
+  }
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+
+  const aPos  = gl.getAttribLocation(prog,  'aVertexPosition');
+  const uRes  = gl.getUniformLocation(prog, 'iResolution');
+  const uTime = gl.getUniformLocation(prog, 'iTime');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const t0 = Date.now();
+  function render() {
+    const t = (Date.now() - t0) / 1000;
+    gl.clearColor(0.1, 0.06, 0.05, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(prog);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uTime, t);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(aPos);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+
+})();
+
+
+/* ═══════════════════════════════════
+   2. THREE.JS COFFEE CUP
+   Exactly as you originally wrote it
+═══════════════════════════════════ */
+const canvas3 = document.getElementById('canvas-hero');
+const renderer = new THREE.WebGLRenderer({ canvas: canvas3, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x1A0F0D, 1);
+renderer.setClearColor(0x000000, 0); /* transparent so shader shows through */
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x1A0F0D, 0.07);
@@ -1368,7 +1497,7 @@ scene.fog = new THREE.FogExp2(0x1A0F0D, 0.07);
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(0, 0, 8.2);
 
-// Lighting
+/* Lighting */
 const ambientLight = new THREE.AmbientLight(0xD4A15A, 0.32);
 scene.add(ambientLight);
 
@@ -1380,7 +1509,7 @@ const fillLight = new THREE.PointLight(0x7A9E7E, 0.7, 12);
 fillLight.position.set(-3.5, -2, 2.5);
 scene.add(fillLight);
 
-// Coffee Cup Group
+/* Coffee Cup Group */
 const cupGroup = new THREE.Group();
 
 const bodyMat = new THREE.MeshPhysicalMaterial({ color: 0x3D2117, metalness: 0.1, roughness: 0.25, transparent: true, opacity: 0.96 });
@@ -1396,7 +1525,12 @@ coffeeSurface.rotation.x = -Math.PI / 2;
 coffeeSurface.position.y = 0.52;
 cupGroup.add(coffeeSurface);
 
-const handleCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(0.58, 0.2, 0), new THREE.Vector3(1.08, 0.2, 0), new THREE.Vector3(1.08, -0.12, 0), new THREE.Vector3(0.63, -0.12, 0)]);
+const handleCurve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(0.58, 0.2, 0),
+  new THREE.Vector3(1.08, 0.2, 0),
+  new THREE.Vector3(1.08, -0.12, 0),
+  new THREE.Vector3(0.63, -0.12, 0)
+]);
 cupGroup.add(new THREE.Mesh(new THREE.TubeGeometry(handleCurve, 40, 0.038, 8, false), goldMat));
 
 const saucer = new THREE.Mesh(new THREE.CylinderGeometry(1.28, 0.92, 0.1, 64), new THREE.MeshPhysicalMaterial({ color: 0x2A1810 }));
@@ -1405,17 +1539,20 @@ cupGroup.add(saucer);
 
 scene.add(cupGroup);
 
-// Steam Particles
+/* Steam Particles */
 const steam = [];
 for (let i = 0; i < 28; i++) {
-  const s = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), new THREE.MeshBasicMaterial({ color: 0xEEDDBB, transparent: true, opacity: 0.12 }));
+  const s = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xEEDDBB, transparent: true, opacity: 0.12 })
+  );
   s.position.set((Math.random() - 0.5) * 0.4, 0.6 + Math.random() * 1.6, (Math.random() - 0.5) * 0.28);
   s.userData = { vy: 0.009 + Math.random() * 0.013, ox: s.position.x, phase: Math.random() * Math.PI * 2, life: Math.random() };
   scene.add(s);
   steam.push(s);
 }
 
-// Floating Beans
+/* Floating Coffee Beans */
 const beans = [];
 const beanGeo = new THREE.SphereGeometry(0.075, 16, 8);
 beanGeo.applyMatrix4(new THREE.Matrix4().makeScale(1, 0.62, 1.18));
@@ -1424,38 +1561,47 @@ for (let i = 0; i < 24; i++) {
   const r = 2.2 + Math.random() * 3;
   const a = Math.random() * Math.PI * 2;
   b.position.set(Math.cos(a) * r, (Math.random() - 0.5) * 3.4, Math.sin(a) * r - 1.8);
-  b.userData = { oy: b.position.y, speed: 0.3 + Math.random() * 0.5, phase: Math.random() * Math.PI * 2, rotX: (0.3 + Math.random()) * 0.02, rotY: (0.3 + Math.random()) * 0.015 };
+  b.userData = {
+    oy: b.position.y,
+    speed: 0.3 + Math.random() * 0.5,
+    phase: Math.random() * Math.PI * 2,
+    rotX: (0.3 + Math.random()) * 0.02,
+    rotY: (0.3 + Math.random()) * 0.015
+  };
   scene.add(b);
   beans.push(b);
 }
 
+let mx = 0, my = 0;
 let time = 0;
-function animate() {
-  requestAnimationFrame(animate);
+
+function animateCup() {
+  requestAnimationFrame(animateCup);
   time += 0.012;
+
   cupGroup.rotation.y += ((mx / window.innerWidth - 0.5) * 0.35 - cupGroup.rotation.y) * 0.05;
   cupGroup.rotation.x += ((-(my / window.innerHeight - 0.5) * 0.12) - cupGroup.rotation.x) * 0.05;
-  cupGroup.position.y = Math.sin(time * 0.6) * 0.07;
-  
+  cupGroup.position.y  = Math.sin(time * 0.6) * 0.07;
+
   steam.forEach(s => {
     s.userData.life += 0.008;
     if (s.userData.life > 1) { s.userData.life = 0; s.position.y = 0.62; }
     s.position.y += s.userData.vy;
-    s.position.x = s.userData.ox + Math.sin(time * 1.5 + s.userData.phase) * 0.12;
+    s.position.x  = s.userData.ox + Math.sin(time * 1.5 + s.userData.phase) * 0.12;
     s.material.opacity = 0.12 * (1 - s.userData.life * 0.7);
     s.scale.setScalar(1 + s.userData.life * 0.9);
   });
-  
+
   beans.forEach(b => {
-    b.position.y = b.userData.oy + Math.sin(time * b.userData.speed + b.userData.phase) * 0.42;
+    b.position.y  = b.userData.oy + Math.sin(time * b.userData.speed + b.userData.phase) * 0.42;
     b.rotation.x += b.userData.rotX;
     b.rotation.y += b.userData.rotY;
   });
-  
+
   keyLight.intensity = 2.1 + Math.sin(time * 1.3) * 0.4;
   renderer.render(scene, camera);
 }
-animate();
+animateCup();
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -1463,17 +1609,56 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Scroll Reveal
+/* Fade cup canvas out when user scrolls past hero */
+window.addEventListener('scroll', () => {
+  const heroH = document.getElementById('hero').offsetHeight;
+  if (window.scrollY > heroH * 0.6) {
+    canvas3.classList.add('hidden');
+  } else {
+    canvas3.classList.remove('hidden');
+  }
+});
+
+
+/* ═══════════════════════════════════
+   3. CURSOR
+═══════════════════════════════════ */
+const cursor     = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let rx = 0, ry = 0;
+
+document.addEventListener('mousemove', function(e) {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top  = my + 'px';
+});
+
+setInterval(function() {
+  rx += (mx - rx) * 0.11;
+  ry += (my - ry) * 0.11;
+  cursorRing.style.left = rx + 'px';
+  cursorRing.style.top  = ry + 'px';
+}, 16);
+
+
+/* ═══════════════════════════════════
+   4. SCROLL REVEAL
+═══════════════════════════════════ */
 const revealElements = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.12 });
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
 revealElements.forEach(el => observer.observe(el));
 
-// Card Tilt Effect
+
+/* ═══════════════════════════════════
+   5. CARD 3D TILT
+═══════════════════════════════════ */
 document.querySelectorAll('.dish-card, .legend-item, .coffee-card, .drink-card, .event-card').forEach(card => {
   card.addEventListener('mousemove', function(e) {
     const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12;
+    const x = ((e.clientX - rect.left) / rect.width  - 0.5) * 12;
+    const y = ((e.clientY - rect.top)  / rect.height - 0.5) * -12;
     card.style.transform = `translateY(-8px) rotateX(${y}deg) rotateY(${x}deg)`;
   });
   card.addEventListener('mouseleave', function() {
@@ -1481,17 +1666,26 @@ document.querySelectorAll('.dish-card, .legend-item, .coffee-card, .drink-card, 
   });
 });
 
-// Page Navigation Dots
-const dots = document.querySelectorAll('.page-dot');
+
+/* ═══════════════════════════════════
+   6. PAGE NAV DOTS
+═══════════════════════════════════ */
+const dots    = document.querySelectorAll('.page-dot');
 const sections = ['hero', 'specials', 'legends', 'coffee', 'drinks', 'events', 'map'];
 
 window.addEventListener('scroll', function() {
   let active = 0;
-  sections.forEach((id, i) => { const el = document.getElementById(id); if (el && window.scrollY >= el.offsetTop - 300) active = i; });
+  sections.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 300) active = i;
+  });
   dots.forEach((d, i) => d.classList.toggle('active', i === active));
 });
 
-dots.forEach((d, i) => d.addEventListener('click', () => { document.getElementById(sections[i]).scrollIntoView({ behavior: 'smooth' }); }));
+dots.forEach((d, i) => d.addEventListener('click', () => {
+  document.getElementById(sections[i]).scrollIntoView({ behavior: 'smooth' });
+}));
+
 </script>
 </body>
 </html>
